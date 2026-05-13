@@ -1,115 +1,100 @@
 const mineflayer = require('mineflayer');
 
-// CONFIGURACIÓN
+// CONFIG
 const HOST = process.argv[2] || 'play.ethernal.lat';
 const PORT = parseInt(process.argv[3] || '25582');
 const BASE_NAME = process.argv[4] || 'ElcasLcasXZ';
 const AUTH = process.argv[5] || 'offline';
 const VERSION = process.argv[6] || '1.20.4';
 
-const REG_PASS = 'reiko14';
-const TARGET_PLAYER = 'zDrowzy';
+const PASSWORD = 'reiko14';
 const BOT_COUNT = 3;
 
-// Ítems que queremos soltar
+// Items a tirar
 const ITEMS_TO_DROP = [
   'spawner',
   'tripwire_hook',
   'bamboo',
-  'blaze_rod',
-  'prismarine_shard'
+  'blaze_rod'
 ];
 
 function createBot(username) {
   const bot = mineflayer.createBot({
     host: HOST,
     port: PORT,
-    username: username,
+    username,
     auth: AUTH,
-    version: VERSION,
+    version: VERSION
   });
 
   bot.on('login', () => {
-    console.log(`[${username}] Logueado en ${HOST}:${PORT} (versión ${VERSION})`);
+    console.log(`[${username}] Conectado.`);
   });
 
   bot.on('spawn', () => {
-    console.log(`[${username}] Spawn detectado. Iniciando secuencia...`);
+    console.log(`[${username}] Spawn detectado.`);
 
-    // REGISTER
+    // 0s -> REGISTER
+    bot.chat(`/register ${PASSWORD} ${PASSWORD}`);
+    console.log(`[${username}] ✔ Register enviado`);
+
+    // +2s -> LOGIN
     setTimeout(() => {
-      bot.chat(`/register ${REG_PASS} ${REG_PASS}`);
-      console.log(`[${username}] ✔ /register enviado.`);
-    }, 1000);
+      bot.chat(`/login ${PASSWORD}`);
+      console.log(`[${username}] ✔ Login enviado`);
+    }, 2000);
 
-    // LOGIN SIEMPRE
-    setTimeout(() => {
-      bot.chat(`/login ${REG_PASS}`);
-      console.log(`[${username}] ✔ /login enviado.`);
-    }, 3000);
-
-    // KIT
+    // +4s -> KIT
     setTimeout(() => {
       bot.chat('/kit claim Kit_Inicio');
-      console.log(`[${username}] ✔ /kit claim Kit_Inicio enviado.`);
-    }, 6000);
+      console.log(`[${username}] ✔ Kit enviado`);
+    }, 4000);
 
-    // TPA
+    // +7s -> TIRAR ITEMS
     setTimeout(() => {
-      bot.chat(`/tpa ${TARGET_PLAYER}`);
-      console.log(`[${username}] ✔ /tpa ${TARGET_PLAYER} enviado.`);
-    }, 9000);
-
-    // SOLTAR ITEMS
-    setTimeout(() => {
-      const itemsToToss = bot.inventory.items().filter(item =>
+      const items = bot.inventory.items().filter(item =>
         ITEMS_TO_DROP.includes(item.name)
       );
 
-      if (itemsToToss.length === 0) {
-        console.log(`[${username}] ❌ No se encontraron ítems para soltar.`);
+      if (items.length === 0) {
+        console.log(`[${username}] ❌ No hay items para tirar`);
         return;
       }
 
-      console.log(`[${username}] ✔ Soltando ${itemsToToss.length} stack(s)...`);
+      console.log(`[${username}] ✔ Tirando items...`);
 
-      itemsToToss.forEach(item => {
-        console.log(`[${username}]    - ${item.name} x${item.count}`);
-
-        bot.tossStack(item, (err) => {
+      items.forEach(item => {
+        bot.tossStack(item, err => {
           if (err) {
-            console.log(`[${username}] Error al soltar ${item.name}: ${err.message}`);
+            console.log(`[${username}] Error soltando ${item.name}: ${err.message}`);
           } else {
-            console.log(`[${username}] ✔ Soltado ${item.count} ${item.name}`);
+            console.log(`[${username}] ✔ Soltado ${item.name} x${item.count}`);
           }
         });
       });
-    }, 24000);
+    }, 7000);
   });
 
   bot.on('error', err => {
-    console.log(`[${username}] [ERROR] ${err.message}`);
+    console.log(`[${username}] ERROR: ${err.message}`);
   });
 
   bot.on('end', reason => {
-    console.log(`[${username}] [DESCONECTADO] ${reason}`);
+    console.log(`[${username}] DESCONECTADO: ${reason}`);
   });
 
   bot.on('kicked', reason => {
-    console.log(`[${username}] [KICKEADO] ${reason}`);
+    console.log(`[${username}] KICKEADO: ${reason}`);
   });
-
-  return bot;
 }
 
-// INICIAR BOTS
-console.log(`Creando ${BOT_COUNT} bots con base "${BASE_NAME}"...`);
+// Crear bots
+console.log(`Iniciando ${BOT_COUNT} bots...`);
 
 for (let i = 1; i <= BOT_COUNT; i++) {
   const username = `${BASE_NAME}_${i}`;
 
   setTimeout(() => {
-    console.log(`[SISTEMA] Iniciando bot ${username}...`);
     createBot(username);
-  }, (i - 1) * 2000);
+  }, i * 2000);
 }
