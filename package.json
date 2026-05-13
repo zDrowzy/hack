@@ -1,1 +1,12 @@
-
+{
+  "name": "mineflayer-bot",
+  "version": "1.0.0",
+  "main": "afk.js",
+  "scripts": {
+    "start": "node free.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "mineflayer": "^4.20.1"
+  }
+}
