@@ -3,7 +3,7 @@ const mineflayer = require('mineflayer');
 // CONFIG
 const HOST = process.argv[2] || 'play.ethernal.lat';
 const PORT = parseInt(process.argv[3] || '25582');
-const BASE_NAME = process.argv[4] || 'ElcasLcasXZ';
+const BASE_NAME = process.argv[4] || 'impr3k1ng';
 const AUTH = process.argv[5] || 'offline';
 const VERSION = process.argv[6] || '1.20.4';
 
