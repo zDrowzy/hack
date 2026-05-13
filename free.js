@@ -1,4 +1,3 @@
-// bot_multi.js
 const mineflayer = require('mineflayer');
 
 // CONFIGURACIÓN
@@ -12,13 +11,13 @@ const REG_PASS = 'reiko14';
 const TARGET_PLAYER = 'zDrowzy';
 const BOT_COUNT = 3;
 
-// Ítems que queremos soltar (nombres internos de Minecraft)
+// Ítems que queremos soltar
 const ITEMS_TO_DROP = [
-  'spawner',           // spawners
-  'tripwire_hook',     // ganchos
-  'bamboo',            // bambú
-  'blaze_rod',         // vara de blaze
-  'prismarine_shard'   // fragmento de prismarina
+  'spawner',
+  'tripwire_hook',
+  'bamboo',
+  'blaze_rod',
+  'prismarine_shard'
 ];
 
 function createBot(username) {
@@ -28,7 +27,6 @@ function createBot(username) {
     username: username,
     auth: AUTH,
     version: VERSION,
-    // skipValidation: true,
   });
 
   bot.on('login', () => {
@@ -38,57 +36,78 @@ function createBot(username) {
   bot.on('spawn', () => {
     console.log(`[${username}] Spawn detectado. Iniciando secuencia...`);
 
-    // Registro (1 s)
+    // REGISTER
     setTimeout(() => {
       bot.chat(`/register ${REG_PASS} ${REG_PASS}`);
       console.log(`[${username}] ✔ /register enviado.`);
     }, 1000);
 
-    // Kit inicial (5 s)
+    // LOGIN SIEMPRE
+    setTimeout(() => {
+      bot.chat(`/login ${REG_PASS}`);
+      console.log(`[${username}] ✔ /login enviado.`);
+    }, 3000);
+
+    // KIT
     setTimeout(() => {
       bot.chat('/kit claim Kit_Inicio');
-      console.log(`[${username}] ✔ /kit claim Kit_Inicio enviado (5 s).`);
-    }, 5000);
+      console.log(`[${username}] ✔ /kit claim Kit_Inicio enviado.`);
+    }, 6000);
 
-    // TPA (8 s)
+    // TPA
     setTimeout(() => {
       bot.chat(`/tpa ${TARGET_PLAYER}`);
-      console.log(`[${username}] ✔ /tpa ${TARGET_PLAYER} enviado (8 s).`);
-    }, 8000);
+      console.log(`[${username}] ✔ /tpa ${TARGET_PLAYER} enviado.`);
+    }, 9000);
 
-    // Soltar todos los ítems deseados (23 s)
+    // SOLTAR ITEMS
     setTimeout(() => {
       const itemsToToss = bot.inventory.items().filter(item =>
         ITEMS_TO_DROP.includes(item.name)
       );
 
       if (itemsToToss.length === 0) {
-        console.log(`[${username}] ❌ No se encontraron ítems para soltar. ¿Llegó el kit?`);
+        console.log(`[${username}] ❌ No se encontraron ítems para soltar.`);
         return;
       }
 
-      console.log(`[${username}] ✔ Soltando ${itemsToToss.length} stack(s) de ítems:`);
+      console.log(`[${username}] ✔ Soltando ${itemsToToss.length} stack(s)...`);
+
       itemsToToss.forEach(item => {
         console.log(`[${username}]    - ${item.name} x${item.count}`);
+
         bot.tossStack(item, (err) => {
-          if (err) console.log(`[${username}] Error al soltar ${item.name}: ${err.message}`);
-          else console.log(`[${username}]    -> Soltado ${item.count} ${item.name}(s).`);
+          if (err) {
+            console.log(`[${username}] Error al soltar ${item.name}: ${err.message}`);
+          } else {
+            console.log(`[${username}] ✔ Soltado ${item.count} ${item.name}`);
+          }
         });
       });
-    }, 23000);
+    }, 24000);
   });
 
-  bot.on('error', err => console.log(`[${username}] [ERROR] ${err.message}`));
-  bot.on('end', reason => console.log(`[${username}] [DESCONECTADO] ${reason}`));
-  bot.on('kicked', reason => console.log(`[${username}] [KICKEADO] ${reason}`));
+  bot.on('error', err => {
+    console.log(`[${username}] [ERROR] ${err.message}`);
+  });
+
+  bot.on('end', reason => {
+    console.log(`[${username}] [DESCONECTADO] ${reason}`);
+  });
+
+  bot.on('kicked', reason => {
+    console.log(`[${username}] [KICKEADO] ${reason}`);
+  });
 
   return bot;
 }
 
-// Iniciar múltiples bots
+// INICIAR BOTS
 console.log(`Creando ${BOT_COUNT} bots con base "${BASE_NAME}"...`);
+
 for (let i = 1; i <= BOT_COUNT; i++) {
   const username = `${BASE_NAME}_${i}`;
+
   setTimeout(() => {
     console.log(`[SISTEMA] Iniciando bot ${username}...`);
     createBot(username);
